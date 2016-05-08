@@ -57,3 +57,5 @@ define service{
     check_command                   check_cpu_via_netdata!19999!60!80!90
 }
 ```
+
+More probes will be added soon.
