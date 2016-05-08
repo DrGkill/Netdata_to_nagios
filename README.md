@@ -28,7 +28,7 @@ It as only be tested on Linux but should perferctly works on other Unix and Wind
 
 To install the plugin, just paste the file into your plugin diretory and configure your monitoring system like so :
 
-
+Monitor memory usage:
 ```
 define command{
     command_name    check_memory_via_netdata
@@ -40,5 +40,20 @@ define service{
     host_name                       mymachine
     service_description             Memory Usage
     check_command                   check_memory_via_netdata!19999!2!80!90
+}
+```
+
+Monitor CPU usage per application, will alert on which process consume to much CPU:
+```
+define command{
+    command_name    check_cpu_via_netdata
+    command_line    $PLUGIN_PATH$/netdata_to_nagios -H $HOSTADDRESS$ -p $ARG1$ -D apps.cpu -i $ARG2$ -w $ARG3$ -c $ARG4$
+}
+		
+define service{
+	use                             generic-service         ; Name of service template to use
+    host_name                       mymachine
+    service_description             CPU Usage per process
+    check_command                   check_cpu_via_netdata!19999!60!80!90
 }
 ```
