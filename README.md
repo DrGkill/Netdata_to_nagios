@@ -28,11 +28,16 @@ It as only be tested on Linux but should perferctly works on other Unix and Wind
 
 To install the plugin, just paste the file into your plugin diretory and configure your monitoring system like so :
 
+```
+cp netdata_to_nagios.py /usr/libexec/nagiosplugins/
+chmod +x netdata_to_nagios.py
+```
+
 Monitor memory usage:
 ```
 define command{
     command_name    check_memory_via_netdata
-    command_line    $PLUGIN_PATH$/netdata_to_nagios -H $HOSTADDRESS$ -p $ARG1$ -D system.ram -i $ARG2$ -w $ARG3$ -c $ARG4$
+    command_line    $PLUGIN_PATH$/netdata_to_nagios.py -H $HOSTADDRESS$ -p $ARG1$ -D system.ram -i $ARG2$ -w $ARG3$ -c $ARG4$
 }
 		
 define service{
@@ -47,7 +52,7 @@ Monitor CPU usage per application, will alert on which process consume to much C
 ```
 define command{
     command_name    check_cpu_via_netdata
-    command_line    $PLUGIN_PATH$/netdata_to_nagios -H $HOSTADDRESS$ -p $ARG1$ -D apps.cpu -i $ARG2$ -w $ARG3$ -c $ARG4$
+    command_line    $PLUGIN_PATH$/netdata_to_nagios.py -H $HOSTADDRESS$ -p $ARG1$ -D apps.cpu -i $ARG2$ -w $ARG3$ -c $ARG4$
 }
 		
 define service{
