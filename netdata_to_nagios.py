@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # ####################################################################
 # Script Description :  Nagios/Shinken/centreon/icinga script for 
 #						alerting via netdata source
