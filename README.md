@@ -16,7 +16,7 @@ Table of Contents:
 <a name="intro"></a>
 ### Introduction
 Netdata to Nagios is a plugin that allows you to get alert via Netdata perfcounter source. 
-Netdata is a neat project that gives you real time metrology.
+<a href=https://github.com/firehol/netdata>Netdata</a> is a neat project that gives you real time metrology.
 The plugins works with Nagios, Shinken, Icinga and Centreon.
 It also gives perfdata for long time metrology.
 
