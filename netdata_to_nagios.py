@@ -180,12 +180,12 @@ def analyze_ram(datapoints,warn,crit):
 	
 	if used_ram_proportion >= warn and used_ram_proportion < crit:
 		warning_flag=True
-		output_buffer += "RAM used at "+used_ram_proportion+"%"
+		warining_buffer += "RAM used at "+used_ram_proportion+"%"
 	elif used_ram_proportion >= crit:
 		critical_flag=True
-		output_buffer += "RAM used at "+used_ram_proportion+"%"
+		critical_buffer += "RAM used at "+used_ram_proportion+"%"
 	else:
-		output_buffer="OK"
+		output_buffer="OK : "+used_ram_proportion+"%"
 		ok_flag=True
 
 	output_buffer += perfdata_buffer
@@ -226,7 +226,7 @@ def analyze_cpu_per_process(datapoints,warn,crit):
 		perfdata_buffer+=process+"="+str(means[process])+", "
 		if (means[process] >= warn) and means[process] < crit:
 			warning_flag=True
-			output_buffer+=" "+process+","
+			warning_buffer+=" "+process+","
 		if means[process] >= crit:
 			critical_flag=True
 			critical_buffer+=" "+process+","
