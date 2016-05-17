@@ -11,6 +11,7 @@ Table of Contents:
 
 * [Introduction] (#intro)
 * [Install] (#install)
+* [Command options] (#options)
 
 
 <a name="intro"></a>
@@ -61,6 +62,44 @@ define service{
     service_description             CPU Usage per process
     check_command                   check_cpu_via_netdata!19999!60!80!90
 }
+```
+<a name="options"></a>
+### Command options
+
+Here is the full command options manual :
+
+```
+    Utilisation:
+    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] [-c <90>] [-w <80>]
+
+    Options:
+     -h, --help
+        Show detailed help
+
+     -H, --host
+        Specify remote netdata host address
+        Default : 127.0.0.1
+
+     -p, --port
+        Specify remote netdata port
+        Default : 19999
+
+     -D, --datasource
+        Specify which datasource you want to check.
+        Available datasources :
+            - apps.cpu (default)
+            - system.ram
+            - disk_util.sda (sda, sdb,... can specify the name of your drive)
+
+     -i interval
+        Specify an interval in seconds (minimum 2)
+        Default : 60
+
+     -w, --warning
+        Specify warning threashold
+
+     -c, --critical
+        Specify critical threashold
 ```
 
 More probes will be added soon.
