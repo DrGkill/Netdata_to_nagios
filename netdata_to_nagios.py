@@ -64,7 +64,7 @@ import pprint
 def usage():
     usage = """
     Utilisation:
-    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] [-c <90>] [-w <80>]
+    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] [-w <80>] [-c <90>] 
     
     Options:
      -h, --help 
@@ -246,12 +246,12 @@ def analyze_ram(datapoints,warn,crit):
     
     if used_ram_proportion >= warn and used_ram_proportion < crit:
         warning_flag=True
-        warining_buffer += "RAM used at "+used_ram_proportion+"%"
+        warining_buffer += "RAM used at "+str(used_ram_proportion)+"%"
     elif used_ram_proportion >= crit:
         critical_flag=True
-        critical_buffer += "RAM used at "+used_ram_proportion+"%"
+        critical_buffer += "RAM used at "+str(used_ram_proportion)+"%"
     else:
-        output_buffer="OK : "+used_ram_proportion+"%"
+        output_buffer="OK : "+str(used_ram_proportion)+"%"
         ok_flag=True
 
     output_buffer += perfdata_buffer

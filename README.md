@@ -2,7 +2,7 @@ Netdata to Nagios, a plugin for alerting on Netdata perfcounters
 =================================================================
 
 ```
-root@Nagios:~# python nagios_netdata.py -H 127.0.0.1 -D apps.cpu -i 0 -w 80 -c 90
+root@Nagios:~# python nagios_netdata.py -H 127.0.0.1 -D apps.cpu -i 60 -w 80 -c 90
 OK | kernel=0.070277775, log=0.000277777777778, system=0.0130555555556, inetd=0, cron=0.00333333333333, ksmd=0, other=0.000277777777778, lxc=0, ssh=0.00833333055556, netdata=1.35777795556, apache=0.00333333333333, nms=0.025,
 ```
 
