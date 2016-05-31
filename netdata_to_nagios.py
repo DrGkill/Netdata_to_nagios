@@ -28,9 +28,9 @@
 #        Specify an interval in seconds (minimum 2)
 #        Default : 2
 #     -w, --warning
-#        Specify warning threashold
+#        Specify warning threshold
 #     -c, --critical
-#        Specify critical threashold
+#        Specify critical threshold
 #
 # Usage domain: Made to be lauched by Nagios or Shinken or Centreon or Incinga
 #
@@ -90,10 +90,10 @@ def usage():
         Default : 60
         
      -w, --warning
-        Specify warning threashold
+        Specify warning threshold
         
      -c, --critical
-        Specify critical threashold
+        Specify critical threshold
     """
     
     return usage
@@ -343,14 +343,14 @@ def main(argv):
     try: 
         warning
     except NameError:
-        print "Missing warning threashold !"
+        print "Missing warning threshold !"
         print usage()
         sys.exit(4)
     
     try:
         critical
     except NameError:
-        print "Missing critical threashold !"
+        print "Missing critical threshold !"
         print usage()
         sys.exit(4)
 
