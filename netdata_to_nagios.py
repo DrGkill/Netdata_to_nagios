@@ -24,6 +24,7 @@
 #            - apps.cpu (default)
 #            - system.ram
 #            - disk_util.sda
+#            - disk_space.sda1
 #     -i interval
 #        Specify an interval in seconds (minimum 2)
 #        Default : 2
@@ -84,6 +85,7 @@ def usage():
             - apps.cpu (default)
             - system.ram
             - disk_util.sda (sda, sdb,... can specify the name of your drive)
+            - disk_space.sda1 (sda, sdb,... can specify the name of your partition)
             
      -i interval
         Specify an interval in seconds (minimum 2)
@@ -155,12 +157,19 @@ def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         datasource = splitted_datasource[1]
         disk = splitted_datasource[2]
         
+    if re.match('disk_space',datasource) != None:
+        splitted_datasource = re.split('(disk_space).(\w+)',datasource)
+        datasource = splitted_datasource[1]
+        partition = splitted_datasource[2]
+        
     if datasource == "apps.cpu":
         return_value = analyze_cpu_per_process(datapoints,warn,crit)
     elif datasource == "system.ram":
         return_value = analyze_ram(datapoints,warn,crit)
     elif datasource == "disk_util":
         return_value = analyze_disk(datapoints,disk,warn,crit)
+    elif datasource == "disk_space":
+        return_value = analyze_disk_space(datapoints,partition,warn,crit)
     else: 
         return None
     
@@ -170,7 +179,7 @@ def analyze_disk(datapoints,disk,warn,crit):
     ds = init_datastruct(warn,crit)
     
     res = dict()
-    nb_of_datapoints=len(datapoints['data'])
+    nb_of_datapoints = len(datapoints['data'])
     
     occupation_time = 0
     for time in range(0, nb_of_datapoints):
@@ -182,11 +191,11 @@ def analyze_disk(datapoints,disk,warn,crit):
     ds['perfdata_buffer'] += "time="+str(last_point)+", occupation_time="+occ_time_str
     
     if occupation_time >= ds['warn'] and occupation_time < ds['crit']:
-        ds['warning_flag']=True
-        ds['warining_buffer'] += "Occupation time of "+disk+" : "+occ_time_str+"%"
-    elif occupation_time >= crit:
+        ds['warning_flag'] = True
+        ds['output_buffer'] += "Occupation time of "+disk+" : "+occ_time_str+"%"
+    elif occupation_time >= ds['crit']:
         ds['critical_flag'] = True
-        ds['critical_buffer'] += "Occupation time of "+disk+" : "+occ_time_str+"%"
+        ds['output_buffer'] += "Occupation time of "+disk+" : "+occ_time_str+"%"
     else:
         ds['output_buffer']="OK : "+occ_time_str+"%"
         ds['ok_flag']=True
@@ -198,7 +207,43 @@ def analyze_disk(datapoints,disk,warn,crit):
     return res
     
     return 0
-        
+    
+def analyze_disk_space(datapoints,partition,warn,crit):
+    ds = init_datastruct(warn,crit)
+    
+    res = dict()
+    nb_of_datapoints = len(datapoints['data'])
+    
+    available_space = 0
+    total_available = datapoints['data'][0][1] + datapoints['data'][0][2] + datapoints['data'][0][3]
+    for time in range(0, nb_of_datapoints):
+        #["time", "avail", "reserved for root", "used"]
+        available_space += datapoints['data'][time][3]
+        last_point = datapoints['data'][time][0]
+
+    available_space = ((available_space/nb_of_datapoints)/total_available)*100
+    available_space_str = str(available_space)
+    
+    ds['perfdata_buffer'] += "time="+str(last_point)+", "+partition+"="+available_space_str
+    
+    if available_space >= ds['warn'] and available_space < ds['crit']:
+        ds['warning_flag']=True
+        ds['output_buffer'] += "Warning space left on "+partition+" : "+available_space_str+"%"
+    elif available_space >= ds['crit']:
+        ds['critical_flag'] = True
+        ds['output_buffer'] += "Critical space left on "+partition+" : "+available_space_str+"%"
+    else:
+        ds['output_buffer']="OK : "+available_space_str+"%"
+        ds['ok_flag']=True
+
+    ds['output_buffer'] += ds['perfdata_buffer']
+    res['output'] = ds['output_buffer']
+    res['code'] = sysexit(ds['ok_flag'],ds['warning_flag'],ds['critical_flag'])
+    
+    return res
+    
+    return 0
+       
 def analyze_ram(datapoints,warn,crit):
     ok_flag=False
     warning_flag=False
