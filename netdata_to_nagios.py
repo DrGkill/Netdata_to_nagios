@@ -142,11 +142,11 @@ def init_datastruct(warn,crit):
         
 def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
     URL = ""
-    if (int(interval) < 2) or (int(interval) > 3600):
-        print "Interval problem, should be between 2 and 3600: " + interval
+    if (abs(int(interval)) < 1) or (abs(int(interval)) > 3600):
+        print "Interval problem, should be between 1 and 3600: " + interval
         return None
     
-    URL = 'http://'+hostaddress+':'+port+'/api/v1/data?chart='+datasource+'&points='+interval+'&options=seconds'
+    URL = 'http://'+hostaddress+':'+port+'/api/v1/data?chart='+datasource+'&after='+interval+'&options=seconds'
     
     req = urllib2.Request(URL)
     res = urllib2.urlopen(req)
@@ -365,7 +365,7 @@ def main(argv):
             sys.exit(4)
     hostaddress = '127.0.0.1'
     port = '19999'
-    interval = '60'
+    interval = '-60'
     datasource = 'apps.cpu'
     
     for opt, arg in opts:
@@ -383,7 +383,7 @@ def main(argv):
         elif opt in ("-D","--datasource"):
             datasource = arg
         elif opt in ("-i", "--interval"):
-            interval= arg
+            interval= str(0-int(arg))
 
     try: 
         warning
