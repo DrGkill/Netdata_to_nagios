@@ -83,6 +83,7 @@ def usage():
         Specify which datasource you want to check. 
         Available datasources :
             - apps.cpu (default)
+            - system.cpu
             - system.ram
             - disk_util.sda (sda, sdb,... can specify the name of your drive)
             - disk_space.sda1 (sda, sdb,... can specify the name of your partition)
@@ -170,11 +171,101 @@ def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         return_value = analyze_disk(datapoints,disk,warn,crit)
     elif datasource == "disk_space":
         return_value = analyze_disk_space(datapoints,partition,warn,crit)
+    elif datasource == "system.cpu":
+        return_value = analyze_system_cpu(datapoints,warn,crit)
     else: 
         return None
     
     return return_value 
+ 
+def analyze_system_cpu(datapoints,warn,crit):
+    ds = init_datastruct(warn,crit)
+    
+    res = dict()
+    nb_of_datapoints = len(datapoints['data'])
+    
+    softirq = 0
+    irq = 0
+    user = 0
+    system = 0
+    nice = 0
+    iowait = 0
+    for time in range(0, nb_of_datapoints):
+        #"labels": ["time", "guest_nice", "guest", "steal", "softirq", "irq", "user", "system", "nice", "iowait"]
+        #               0             1        2        3          4      5       6         7       8         9
+        softirq += datapoints['data'][time][4]
+        irq += datapoints['data'][time][5]
+        user += datapoints['data'][time][6]
+        system += datapoints['data'][time][7]
+        nice += datapoints['data'][time][8]
+        iowait += datapoints['data'][time][9]
         
+    last_point = datapoints['data'][-1][0]
+    
+    softirq = softirq/nb_of_datapoints
+    irq     = irq/nb_of_datapoints
+    user    = user/nb_of_datapoints
+    system  = system/nb_of_datapoints
+    nice    = nice/nb_of_datapoints
+    iowait  = iowait/nb_of_datapoints
+    
+    ds['perfdata_buffer'] += "time=%s, soft_irq=%s, irq=%s, user=%s, system=%s, nice=%s, iowait=%s" \
+        % (last_point,softirq,irq,user,system,nice,iowait)
+    
+    if softirq >= ds['warn'] and softirq < ds['crit']:
+        ds['warning_flag'] = True
+        ds['output_buffer'] += "Warining, network driver may have an issue: soft_irq=%s%" % (softirq)
+    elif softirq >= ds['crit']:
+        ds['critical_flag'] = True
+        ds['output_buffer'] += "Critical, network driver may have an issue: soft_irq=%s%" % (softirq)
+        
+    elif irq >= ds['warn'] and irq < ds['crit']:
+        ds['warning_flag'] = True
+        ds['output_buffer'] += "Warining, lots of interruptions: irq=%s%%" % (irq)
+    elif irq >= ds['crit']:
+        ds['critical_flag'] = True
+        ds['output_buffer'] += "Critical, lots of interruptions: irq=%s%%" % (irq)    
+        
+    elif user >= ds['warn'] and user < ds['crit']:
+        ds['warning_flag'] = True
+        ds['output_buffer'] += "Warining, an application is highly loaded: user=%s%%" % (user)
+    elif user >= ds['crit']:
+        ds['critical_flag'] = True
+        ds['output_buffer'] += "Critical, an application is highly loaded: user=%s%%" % (user)
+        
+    elif system >= ds['warn'] and system < ds['crit']:
+        ds['warning_flag'] = True
+        ds['output_buffer'] += "Warining, system is highly loaded: system=%s%%" % (system)
+    elif system >= ds['crit']:
+        ds['critical_flag'] = True
+        ds['output_buffer'] += "Critical, system is highly loaded: system=%s%%" % (system)
+     
+    elif nice >= ds['warn'] and nice < ds['crit']:
+        ds['warning_flag'] = True
+        ds['output_buffer'] += "Warining, scheduling overhead too high: nice=%s%%" % (nice)
+    elif nice >= ds['crit']:
+        ds['critical_flag'] = True
+        ds['output_buffer'] += "Critical, scheduling overhead too high: nice=%s%%" % (nice)
+     
+    elif iowait >= ds['warn'] and iowait < ds['crit']:
+        ds['warning_flag'] = True
+        ds['output_buffer'] += "Warining, a disk may be slowing everybody down: iowait=%s%%" % (iowait)
+    elif iowait >= ds['crit']:
+        ds['critical_flag'] = True
+        ds['output_buffer'] += "Critical, a disk may be slowing everybody down: iowait=%s%%" % (iowait)
+     
+    else:
+        ds['output_buffer']="CPU OK"
+        ds['ok_flag']=True
+
+    ds['output_buffer'] += ds['perfdata_buffer']
+    res['output'] = ds['output_buffer']
+    res['code'] = sysexit(ds['ok_flag'],ds['warning_flag'],ds['critical_flag'])
+    
+    return res
+    
+    return 0
+ 
 def analyze_disk(datapoints,disk,warn,crit):
     ds = init_datastruct(warn,crit)
     
