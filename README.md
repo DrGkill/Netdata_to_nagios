@@ -70,7 +70,7 @@ Here is the full command options manual :
 
 ```
     Utilisation:
-    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] [-c <90>] [-w <80>]
+    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] [-w <80>] [-c <90>]
 
     Options:
      -h, --help
@@ -90,16 +90,18 @@ Here is the full command options manual :
             - apps.cpu (default)
             - system.ram
             - disk_util.sda (sda, sdb,... can specify the name of your drive)
+            - disk_space.sda1 (sda, sdb,... can specify the name of your partition)
 
      -i interval
         Specify an interval in seconds (minimum 2)
         Default : 60
 
      -w, --warning
-        Specify warning threashold
+        Specify warning threshold
 
      -c, --critical
-        Specify critical threashold
+        Specify critical threshold
+
 ```
 
 More probes will be added soon.
