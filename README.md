@@ -87,8 +87,9 @@ Here is the full command options manual :
      -D, --datasource
         Specify which datasource you want to check.
         Available datasources :
-            - apps.cpu (default)
+            - apps.cpu (default) Check CPU load per process
             - system.ram
+			- system.cpu : Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
             - disk_util.sda (sda, sdb,... can specify the name of your drive)
             - disk_space.sda1 (sda, sdb,... can specify the name of your partition)
 
