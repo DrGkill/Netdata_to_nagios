@@ -83,10 +83,10 @@ def usage():
         Specify which datasource you want to check. 
         Available datasources :
             - apps.cpu (default) Check CPU load per process
-            - system.ram
+            - system.ram : Check REAL RAM consumption
 			- system.cpu : Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
-            - disk_util.sda (sda, sdb,... can specify the name of your drive)
-            - disk_space.sda1 (sda, sdb,... can specify the name of your partition)
+            - disk_util.sda : Check disk load (sda, sdb,... can specify the name of your drive)
+            - disk_space.sda1 : Check disk space (sda, sdb,... can specify the name of your partition)
             
      -i interval
         Specify an interval in seconds (minimum 2)
@@ -453,7 +453,7 @@ def main(argv):
             opts, args = getopt.getopt(argv,"hD:i:w:c:H:p:",["help","datasource=","interval=","warning=","critical=","host=","port="])
     except getopt.GetoptError:
             print usage()
-            sys.exit(4)
+            sys.exit(3)
     hostaddress = '127.0.0.1'
     port = '19999'
     interval = '-60'
@@ -481,18 +481,18 @@ def main(argv):
     except NameError:
         print "Missing warning threshold !"
         print usage()
-        sys.exit(4)
+        sys.exit(3)
     
     try:
         critical
     except NameError:
         print "Missing critical threshold !"
         print usage()
-        sys.exit(4)
+        sys.exit(3)
 
     return_values = get_from_datasource(hostaddress,port,datasource,interval,warning,critical)
     if return_values is None:
-        sys.exit(4)
+        sys.exit(3)
     print return_values['output']
     sys.exit(return_values['code'])
 
