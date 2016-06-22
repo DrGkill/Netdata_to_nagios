@@ -70,7 +70,7 @@ Here is the full command options manual :
 
 ```
     Utilisation:
-    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] [-w <80>] [-c <90>] 
+    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] -w <80> -c <90>
     
     Options:
      -h, --help 
