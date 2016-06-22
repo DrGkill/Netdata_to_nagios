@@ -86,7 +86,7 @@ def usage():
             - system.ram : Check REAL RAM consumption
 			- system.cpu : Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
             - disk_util.sda : Check disk load (sda, sdb,... can specify the name of your drive)
-            - disk_space.sda1 : Check disk space (sda, sdb,... can specify the name of your partition)
+            - disk_space.sda1 : Check disk space (sda2, sdb1,... can specify the name of your partition)
             
      -i interval
         Specify an interval in seconds (minimum 2)
@@ -150,7 +150,13 @@ def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
     URL = 'http://'+hostaddress+':'+port+'/api/v1/data?chart='+datasource+'&after='+interval+'&options=seconds'
     
     req = urllib2.Request(URL)
-    res = urllib2.urlopen(req)
+    
+    try:
+        res = urllib2.urlopen(req, timeout=3)
+    except IOError:
+        print "Unable to connect to netdata node :("
+        sys.exit(3)
+        
     datapoints=json.loads(res.read())
     
     if re.match('disk_util',datasource) != None:

@@ -70,36 +70,36 @@ Here is the full command options manual :
 
 ```
     Utilisation:
-    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] [-w <80>] [-c <90>]
-
+    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] [-w <80>] [-c <90>] 
+    
     Options:
-     -h, --help
+     -h, --help 
         Show detailed help
-
+        
      -H, --host
         Specify remote netdata host address
         Default : 127.0.0.1
-
+        
      -p, --port
         Specify remote netdata port
         Default : 19999
-
+        
      -D, --datasource
-        Specify which datasource you want to check.
+        Specify which datasource you want to check. 
         Available datasources :
             - apps.cpu (default) Check CPU load per process
-            - system.ram
+            - system.ram : Check REAL RAM consumption
 			- system.cpu : Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
-            - disk_util.sda (sda, sdb,... can specify the name of your drive)
-            - disk_space.sda1 (sda, sdb,... can specify the name of your partition)
-
+            - disk_util.sda : Check disk load (sda, sdb,... can specify the name of your drive)
+            - disk_space.sda1 : Check disk space (sda2, sdb1,... can specify the name of your partition)
+            
      -i interval
         Specify an interval in seconds (minimum 2)
         Default : 60
-
+        
      -w, --warning
         Specify warning threshold
-
+        
      -c, --critical
         Specify critical threshold
 
