@@ -154,7 +154,7 @@ def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
     try:
         res = urllib2.urlopen(req, timeout=3)
     except IOError:
-        print "Unable to connect to netdata node :("
+        print "Unable to connect to netdata node, or datasource unknown :("
         sys.exit(3)
         
     datapoints=json.loads(res.read())
