@@ -24,7 +24,7 @@
 #            - apps.cpu (default)
 #            - system.ram
 #            - disk_util.sda
-#            - disk_space.sda1
+#            - disk_space._home
 #     -i interval
 #        Specify an interval in seconds (minimum 2)
 #        Default : 2
@@ -86,7 +86,7 @@ def usage():
             - system.ram : Check REAL RAM consumption
 			- system.cpu : Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
             - disk_util.sda : Check disk load (sda, sdb,... can specify the name of your drive)
-            - disk_space.sda1 : Check disk space (sda2, sdb1,... can specify the name of your partition)
+            - disk_space._ : Check disk space (_ for /, _mnt_disk1 for /mnt/disk1)
             
      -i interval
         Specify an interval in seconds (minimum 2)
@@ -388,10 +388,10 @@ def analyze_ram(datapoints,warn,crit):
     
     if used_ram_proportion >= warn and used_ram_proportion < crit:
         warning_flag=True
-        warining_buffer += "RAM used at "+str(used_ram_proportion)+"%"
+        output_buffer += "RAM used at "+str(used_ram_proportion)+"%"
     elif used_ram_proportion >= crit:
         critical_flag=True
-        critical_buffer += "RAM used at "+str(used_ram_proportion)+"%"
+        output_buffer += "RAM used at "+str(used_ram_proportion)+"%"
     else:
         output_buffer="OK : "+str(used_ram_proportion)+"%"
         ok_flag=True
