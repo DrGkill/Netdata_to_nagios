@@ -154,7 +154,7 @@ def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
     try:
         res = urllib2.urlopen(req, timeout=3)
     except IOError:
-        print "Unable to connect to netdata node :("
+        print "Unable to connect to netdata node, or datasource unknown :("
         sys.exit(3)
         
     datapoints=json.loads(res.read())
@@ -314,9 +314,11 @@ def analyze_disk_space(datapoints,partition,warn,crit):
     available_space = 0
     total_available = datapoints['data'][0][1] + datapoints['data'][0][2] + datapoints['data'][0][3]
     for time in range(0, nb_of_datapoints):
-        #["time", "avail", "reserved for root", "used"]
-        available_space += datapoints['data'][time][3]
-        last_point = datapoints['data'][time][0]
+        #["time", "avail", "reserved for root", "used"] OLD !!!
+        #["time", "avail", "used", "reserved for root"]
+        available_space += datapoints['data'][time][2]
+        
+    last_point = datapoints['data'][-1][0]
 
     available_space = ((available_space/nb_of_datapoints)/total_available)*100
     available_space_str = str(available_space)
