@@ -196,15 +196,26 @@ def analyze_system_cpu(datapoints,warn,crit):
     system = 0
     nice = 0
     iowait = 0
+    
+    index_guest_nice = datapoints['labels'].index("guest_nice")
+    index_guest = datapoints['labels'].index("guest")
+    index_steal = datapoints['labels'].index("steal")
+    index_softirq = datapoints['labels'].index("softirq")
+    index_irq = datapoints['labels'].index("irq")
+    index_user = datapoints['labels'].index("user")
+    index_system = datapoints['labels'].index("system")
+    index_nice = datapoints['labels'].index("nice")
+    index_iowait = datapoints['labels'].index("iowait")
+    
     for time in range(0, nb_of_datapoints):
         #"labels": ["time", "guest_nice", "guest", "steal", "softirq", "irq", "user", "system", "nice", "iowait"]
         #               0             1        2        3          4      5       6         7       8         9
-        softirq += datapoints['data'][time][4]
-        irq += datapoints['data'][time][5]
-        user += datapoints['data'][time][6]
-        system += datapoints['data'][time][7]
-        nice += datapoints['data'][time][8]
-        iowait += datapoints['data'][time][9]
+        softirq += datapoints['data'][time][index_softirq]
+        irq += datapoints['data'][time][index_irq]
+        user += datapoints['data'][time][index_user]
+        system += datapoints['data'][time][index_system]
+        nice += datapoints['data'][time][index_nice]
+        iowait += datapoints['data'][time][index_iowait]
         
     last_point = datapoints['data'][-1][0]
     
@@ -294,7 +305,7 @@ def analyze_disk(datapoints,disk,warn,crit):
         ds['critical_flag'] = True
         ds['output_buffer'] += "Occupation time of "+disk+" : "+occ_time_str+"%"
     else:
-        ds['output_buffer']="OK : "+occ_time_str+"%"
+        ds['output_buffer']="OK : %.2f %%" % occ_time
         ds['ok_flag']=True
 
     ds['output_buffer'] += ds['perfdata_buffer']
@@ -312,11 +323,14 @@ def analyze_disk_space(datapoints,partition,warn,crit):
     nb_of_datapoints = len(datapoints['data'])
     
     available_space = 0
-    total_available = datapoints['data'][0][1] + datapoints['data'][0][2] + datapoints['data'][0][3]
+    #["time", "avail", "used", "reserved for root"]
+    index_avail = datapoints['labels'].index("avail")
+    index_used = datapoints['labels'].index("used")
+    index_reserved = datapoints['labels'].index("reserved for root")
+    
+    total_available = datapoints['data'][0][index_avail] + datapoints['data'][0][index_used] + datapoints['data'][0][index_reserved]
     for time in range(0, nb_of_datapoints):
-        #["time", "avail", "reserved for root", "used"] OLD !!!
-        #["time", "avail", "used", "reserved for root"]
-        available_space += datapoints['data'][time][2]
+        available_space += datapoints['data'][time][index_avail]
         
     last_point = datapoints['data'][-1][0]
 
@@ -332,7 +346,7 @@ def analyze_disk_space(datapoints,partition,warn,crit):
         ds['critical_flag'] = True
         ds['output_buffer'] += "Critical space left on "+partition+" : "+available_space_str+"%"
     else:
-        ds['output_buffer']="OK : "+available_space_str+"%"
+        ds['output_buffer']="OK : %.2f %%" % available_space
         ds['ok_flag']=True
 
     ds['output_buffer'] += ds['perfdata_buffer']
@@ -360,11 +374,16 @@ def analyze_ram(datapoints,warn,crit):
     "labels": ["time", "buffers", "used", "cached", "free"],
     "data":   [ 1462723200, 81.61719, 236.6875, 820.4453, 867.7812]
     """
+    index_buffer = datapoints['labels'].index("buffers")
+    index_used = datapoints['labels'].index("used")
+    index_cached = datapoints['labels'].index("cached")
+    index_free = datapoints['labels'].index("free")
+    
     nb_of_datapoints=len(datapoints['data'])
-    total_ram = datapoints['data'][0][1] + \
-        datapoints['data'][0][2] + \
-        datapoints['data'][0][3] + \
-        datapoints['data'][0][4]
+    total_ram = datapoints['data'][0][index_buffer] + \
+        datapoints['data'][0][index_used] + \
+        datapoints['data'][0][index_cached] + \
+        datapoints['data'][0][index_free]
         
     used_ram = 0
     used = 0
@@ -372,11 +391,11 @@ def analyze_ram(datapoints,warn,crit):
     cached = 0
     free = 0
     for time in range(0, nb_of_datapoints):
-        used_ram = used_ram + datapoints['data'][time][1] + datapoints['data'][time][2]
-        used += datapoints['data'][time][2]
-        buffers += datapoints['data'][time][1]
-        cached += datapoints['data'][time][3]
-        free += datapoints['data'][time][4]
+        used_ram = used_ram + datapoints['data'][time][index_buffer] + datapoints['data'][time][index_used]
+        used += datapoints['data'][time][index_used]
+        buffers += datapoints['data'][time][index_buffer]
+        cached += datapoints['data'][time][index_cached]
+        free += datapoints['data'][time][index_free]
         
     used_ram = used_ram/nb_of_datapoints
     used = used/nb_of_datapoints
@@ -390,12 +409,12 @@ def analyze_ram(datapoints,warn,crit):
     
     if used_ram_proportion >= warn and used_ram_proportion < crit:
         warning_flag=True
-        output_buffer += "RAM used at "+str(used_ram_proportion)+"%"
+        output_buffer += "RAM used at %.2f %%" % used_ram_proportion
     elif used_ram_proportion >= crit:
         critical_flag=True
-        output_buffer += "RAM used at "+str(used_ram_proportion)+"%"
+        output_buffer += "RAM used at %.2f %%" % used_ram_proportion
     else:
-        output_buffer="OK : "+str(used_ram_proportion)+"%"
+        output_buffer="OK : %.2f %%" % used_ram_proportion
         ok_flag=True
 
     output_buffer += perfdata_buffer
