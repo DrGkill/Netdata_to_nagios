@@ -14,6 +14,9 @@ Table of Contents:
 * [Command options] (#options)
 
 
+<img src="http://www.omegacube.fr/static/img/grafana.png">
+Example of graphic in grafana generated with this plugin.
+
 <a name="intro"></a>
 ### Introduction
 Netdata to Nagios is a plugin that allows you to get alert via Netdata perfcounter source. 
@@ -92,6 +95,7 @@ Here is the full command options manual :
 			- system.cpu : Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
             - disk_util.sda : Check disk load (sda, sdb,... can specify the name of your drive)
             - disk_space.sda1 : Check disk space (sda2, sdb1,... can specify the name of your partition)
+			- apache_local.workers : Check Apache worker consumption
             
      -i interval
         Specify an interval in seconds (minimum 2)
