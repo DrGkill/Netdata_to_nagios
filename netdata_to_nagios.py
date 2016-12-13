@@ -87,6 +87,7 @@ def usage():
 			- system.cpu : Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
             - disk_util.sda : Check disk load (sda, sdb,... can specify the name of your drive)
             - disk_space._ : Check disk space (_ for /, _mnt_disk1 for /mnt/disk1)
+            - apache_local.worker : Check apache worker utilization 
             
      -i interval
         Specify an interval in seconds (minimum 2)
@@ -179,11 +180,50 @@ def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         return_value = analyze_disk_space(datapoints,partition,warn,crit)
     elif datasource == "system.cpu":
         return_value = analyze_system_cpu(datapoints,warn,crit)
+    elif datasource == "apache_local.workers":
+        return_value = analyze_apache_workers(datapoints,warn,crit)
     else: 
         return None
     
     return return_value 
- 
+
+def analyze_apache_workers(datapoints,warn,crit):
+    ds = init_datastruct(warn,crit)
+    
+    res = dict()
+    nb_of_datapoints = len(datapoints['data'])
+    
+    #"labels": ["time", "idle", "busy"]
+    index_idle = datapoints['labels'].index("idle")
+    index_busy = datapoints['labels'].index("busy")
+    max_workers = datapoints['data'][0][index_idle] + datapoints['data'][0][index_busy]
+    
+    worker_usage = 0
+    
+    for time in range(0, nb_of_datapoints):
+        worker_usage += datapoints['data'][time][index_busy]
+        
+    worker_usage = float(worker_usage)
+    worker_mean_usage = ((worker_usage/nb_of_datapoints)/max_workers)*100
+    
+    ds['perfdata_buffer'] += "time=%s, worker_usage=%s" % (datapoints['data'][-1][0], worker_mean_usage)
+    
+    if worker_mean_usage >= ds['warn'] and worker_mean_usage < ds['crit']:
+        ds['warning_flag'] = True
+        ds['output_buffer'] += "Warining, apache max worker almost reached : %.2f %%" % (worker_mean_usage)
+    elif worker_mean_usage >= ds['crit']:
+        ds['critical_flag'] = True
+        ds['output_buffer'] += "Critical, apache max worker reached : %.2f %%" % (worker_mean_usage)
+    else:
+        ds['output_buffer']="Workers OK : %.2f %%" % (worker_mean_usage)
+        ds['ok_flag']=True
+        
+    ds['output_buffer'] += ds['perfdata_buffer']
+    res['output'] = ds['output_buffer']
+    res['code'] = sysexit(ds['ok_flag'],ds['warning_flag'],ds['critical_flag'])
+    
+    return res
+    
 def analyze_system_cpu(datapoints,warn,crit):
     ds = init_datastruct(warn,crit)
     
