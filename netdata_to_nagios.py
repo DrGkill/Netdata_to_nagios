@@ -322,7 +322,7 @@ def analyze_disk_space(datapoints,partition,warn,crit):
     res = dict()
     nb_of_datapoints = len(datapoints['data'])
     
-    available_space = 0
+    used_space = 0
     #["time", "avail", "used", "reserved for root"]
     index_avail = datapoints['labels'].index("avail")
     index_used = datapoints['labels'].index("used")
@@ -330,23 +330,23 @@ def analyze_disk_space(datapoints,partition,warn,crit):
     
     total_available = datapoints['data'][0][index_avail] + datapoints['data'][0][index_used] + datapoints['data'][0][index_reserved]
     for time in range(0, nb_of_datapoints):
-        available_space += datapoints['data'][time][index_avail]
+        used_space += datapoints['data'][time][index_used]
         
     last_point = datapoints['data'][-1][0]
 
-    available_space = ((available_space/nb_of_datapoints)/total_available)*100
-    available_space_str = str(available_space)
+    used_space = ((used_space/nb_of_datapoints)/total_available)*100
+    used_space_str = str(used_space)
     
-    ds['perfdata_buffer'] += "time="+str(last_point)+", "+partition+"="+available_space_str
+    ds['perfdata_buffer'] += "time="+str(last_point)+", "+partition+"="+used_space_str
     
-    if available_space >= ds['warn'] and available_space < ds['crit']:
+    if used_space >= ds['warn'] and available_space < ds['crit']:
         ds['warning_flag']=True
-        ds['output_buffer'] += "Warning space left on "+partition+" : "+available_space_str+"%"
-    elif available_space >= ds['crit']:
+        ds['output_buffer'] += "Warning space left on "+partition+" : "+used_space_str+"%"
+    elif used_space >= ds['crit']:
         ds['critical_flag'] = True
-        ds['output_buffer'] += "Critical space left on "+partition+" : "+available_space_str+"%"
+        ds['output_buffer'] += "Critical space left on "+partition+" : "+used_space_str+"%"
     else:
-        ds['output_buffer']="OK : %.2f %%" % available_space
+        ds['output_buffer']="OK : %.2f %%" % used_space
         ds['ok_flag']=True
 
     ds['output_buffer'] += ds['perfdata_buffer']
