@@ -1,5 +1,5 @@
-Netdata to Nagios, a plugin for alerting on Netdata perfcounters
-=================================================================
+Netdata to Nagios, a plugin for alerting on Netdata perfcounters and for long term storage
+==========================================================================================
 
 ```
 root@Nagios:~# python nagios_netdata.py -H 127.0.0.1 -D apps.cpu -i 60 -w 80 -c 90
@@ -37,35 +37,73 @@ cp netdata_to_nagios.py /usr/libexec/nagiosplugins/
 chmod +x netdata_to_nagios.py
 ```
 
-Monitor memory usage:
+Generic command :
 ```
 define command{
     command_name    check_memory_via_netdata
-    command_line    $PLUGIN_PATH$/netdata_to_nagios.py -H $HOSTADDRESS$ -p $ARG1$ -D system.ram -i $ARG2$ -w $ARG3$ -c $ARG4$
+    command_line    $PLUGIN_PATH$/netdata_to_nagios.py -H $HOSTADDRESS$ -p $ARG1$ -D $ARG2$ -i $ARG3$ -w $ARG4$ -c $ARG5$
 }
-		
+```
+Monitor memory usage:	
+```	
 define service{
 	use                             generic-service         ; Name of service template to use
     host_name                       mymachine
     service_description             Memory Usage
-    check_command                   check_memory_via_netdata!19999!2!80!90
+    check_command                   check_memory_via_netdata!19999!system.ram!2!80!90
 }
 ```
 
 Monitor CPU usage per application, will alert on which process consume to much CPU:
-```
-define command{
-    command_name    check_cpu_via_netdata
-    command_line    $PLUGIN_PATH$/netdata_to_nagios.py -H $HOSTADDRESS$ -p $ARG1$ -D apps.cpu -i $ARG2$ -w $ARG3$ -c $ARG4$
-}
-		
+Can help finding which application is consuming CPU ressources
+```	
 define service{
 	use                             generic-service         ; Name of service template to use
     host_name                       mymachine
     service_description             CPU Usage per process
-    check_command                   check_cpu_via_netdata!19999!60!80!90
+    check_command                   check_cpu_via_netdata!19999!apps.cpu!60!80!90 ; Average cpu load during last 60 seconds
+}
+```	
+
+Monitor CPU usage at a system level:
+Can help finding if CPU is busy because of iowait, irq, system operations, etc.
+```	
+define service{
+	use                             generic-service         ; Name of service template to use
+    host_name                       mymachine
+    service_description             CPU Usage per process
+    check_command                   check_cpu_via_netdata!19999!system.cpu!60!80!90 ; Average cpu load during last 60 seconds
 }
 ```
+
+Monitor disk space:
+```	
+define service{
+	use                             generic-service         ; Name of service template to use
+    host_name                       mymachine
+    service_description             CPU Usage per process
+    check_command                   check_cpu_via_netdata!19999!disk_space._!60!80!90 ; monitor / partition
+}
+```
+
+Monitor disk load:
+```	
+define service{
+	use                             generic-service         ; Name of service template to use
+    host_name                       mymachine
+    service_description             CPU Usage per process
+    check_command                   check_cpu_via_netdata!19999!disk_util.sda!60!80!90 ; Average load during last 60 seconds
+}
+
+Monitor Apache workers:
+```	
+define service{
+	use                             generic-service         ; Name of service template to use
+    host_name                       mymachine
+    service_description             CPU Usage per process
+    check_command                   check_cpu_via_netdata!19999!apache_local.workers!60!80!90 ; Average worker consumption during last 60 seconds
+}
+
 <a name="options"></a>
 ### Command options
 

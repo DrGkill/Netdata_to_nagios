@@ -180,7 +180,7 @@ def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         return_value = analyze_disk_space(datapoints,partition,warn,crit)
     elif datasource == "system.cpu":
         return_value = analyze_system_cpu(datapoints,warn,crit)
-    elif datasource == "apache_local.workers":
+    elif re.match('apache(.*).workers',datasource) != None: 
         return_value = analyze_apache_workers(datapoints,warn,crit)
     else: 
         return None
@@ -345,7 +345,7 @@ def analyze_disk(datapoints,disk,warn,crit):
         ds['critical_flag'] = True
         ds['output_buffer'] += "Occupation time of "+disk+" : "+occ_time_str+"%"
     else:
-        ds['output_buffer']="OK : %.2f %%" % occ_time
+        ds['output_buffer']="OK : %.2f %%" % occupation_time
         ds['ok_flag']=True
 
     ds['output_buffer'] += ds['perfdata_buffer']
