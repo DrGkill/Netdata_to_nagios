@@ -87,8 +87,8 @@ def usage():
 			- system.cpu : Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
             - disk_util.sda : Check disk load (sda, sdb,... can specify the name of your drive)
             - disk_space._ : Check disk space (_ for /, _mnt_disk1 for /mnt/disk1)
-            - apache_local.worker : Check apache worker utilization 
-            
+            - apache_local.workers : Check apache worker utilization 
+            - nginx_local.connections : Check nginx connections
      -i interval
         Specify an interval in seconds (minimum 2)
         Default : 60
@@ -182,11 +182,46 @@ def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         return_value = analyze_system_cpu(datapoints,warn,crit)
     elif re.match('apache(.*).workers',datasource) != None: 
         return_value = analyze_apache_workers(datapoints,warn,crit)
+    elif re.match('nginx(.*).connections',datasource) != None: 
+        return_value = analyze_nginx_connections(datapoints,warn,crit)
     else: 
         return None
     
     return return_value 
 
+def analyze_nginx_connections(datapoints,warn,crit):
+    ds = init_datastruct(warn,crit)
+    
+    res = dict()
+    nb_of_datapoints = len(datapoints['data'])
+    
+    connections = 0
+    
+    #"labels": ["time", "active"],
+    index_active = datapoints['labels'].index("active")
+    for time in range(0, nb_of_datapoints):
+        connections += datapoints['data'][time][index_active]
+        
+    connections_mean = int(connections / nb_of_datapoints)
+    
+    ds['perfdata_buffer'] += "time=%s, nginx_connections=%s" % (datapoints['data'][-1][0], connections_mean)
+    
+    if connections_mean >= ds['warn'] and connections_mean < ds['crit']:
+        ds['warning_flag'] = True
+        ds['output_buffer'] += "Warining, nginx max connections almost reached : %d" % (connections_mean)
+    elif connections_mean >= ds['crit']:
+        ds['critical_flag'] = True
+        ds['output_buffer'] += "Critical, nginx max connections reached : %d" % (connections_mean)
+    else:
+        ds['output_buffer']="Connections OK"
+        ds['ok_flag']=True
+        
+    ds['output_buffer'] += ds['perfdata_buffer']
+    res['output'] = ds['output_buffer']
+    res['code'] = sysexit(ds['ok_flag'],ds['warning_flag'],ds['critical_flag'])
+    
+    return res
+    
 def analyze_apache_workers(datapoints,warn,crit):
     ds = init_datastruct(warn,crit)
     
