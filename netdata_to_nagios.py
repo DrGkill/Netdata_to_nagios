@@ -25,6 +25,8 @@
 #            - system.ram
 #            - disk_util.sda
 #            - disk_space._home
+#            - apache_local.workers
+#            - nginx_local.connections : Check nginx connections
 #     -i interval
 #        Specify an interval in seconds (minimum 2)
 #        Default : 2

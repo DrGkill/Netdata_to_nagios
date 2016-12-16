@@ -94,6 +94,7 @@ define service{
     service_description             CPU Usage per process
     check_command                   check_cpu_via_netdata!19999!disk_util.sda!60!80!90 ; Average load during last 60 seconds
 }
+```	
 
 Monitor Apache workers:
 ```	
@@ -103,6 +104,17 @@ define service{
     service_description             CPU Usage per process
     check_command                   check_cpu_via_netdata!19999!apache_local.workers!60!80!90 ; Average worker consumption during last 60 seconds
 }
+```
+
+Monitor Nginx workers:
+```	
+define service{
+	use                             generic-service         ; Name of service template to use
+    host_name                       mymachine
+    service_description             CPU Usage per process
+    check_command                   check_cpu_via_netdata!19999!nginx_local.connections!60!1900!2048 ; Average worker consumption during last 60 seconds
+}
+```
 
 <a name="options"></a>
 ### Command options
