@@ -142,9 +142,8 @@ def init_datastruct(warn,crit):
     )
     
     return datastruct
-    
-        
-def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
+
+def get_simple_datasource(hostaddress,port,datasource,interval):
     URL = ""
     if (abs(int(interval)) < 1) or (abs(int(interval)) > 3600):
         print "Interval problem, should be between 1 and 3600: " + interval
@@ -160,7 +159,12 @@ def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         print "Unable to connect to netdata node, or datasource unknown :("
         sys.exit(3)
         
-    datapoints=json.loads(res.read())
+    return json.loads(res.read())
+    
+        
+def analyze_from_datasource(hostaddress,port,datasource,interval,warn,crit):
+        
+    datapoints = get_simple_datasource(hostaddress,port,datasource,interval)
     
     if re.match('disk_util',datasource) != None:
         splitted_datasource = re.split('(disk_util).(\w+)',datasource)
@@ -174,16 +178,28 @@ def get_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         
     if datasource == "apps.cpu":
         return_value = analyze_cpu_per_process(datapoints,warn,crit)
+        
     elif datasource == "system.ram":
         return_value = analyze_ram(datapoints,warn,crit)
+        
     elif datasource == "disk_util":
         return_value = analyze_disk(datapoints,disk,warn,crit)
+        
     elif datasource == "disk_space":
         return_value = analyze_disk_space(datapoints,partition,warn,crit)
+        
     elif datasource == "system.cpu":
         return_value = analyze_system_cpu(datapoints,warn,crit)
+        
     elif re.match('apache(.*).workers',datasource) != None: 
-        return_value = analyze_apache_workers(datapoints,warn,crit)
+        datasource_connections = re.sub(r'(apache.*).workers',r'\1.connections', datasource)
+        datasource_requests = re.sub(r'(apache.*).workers',r'\1.requests', datasource)
+        
+        apache_connections = get_simple_datasource(hostaddress,port,datasource_connections,interval)
+        apache_requests = get_simple_datasource(hostaddress,port,datasource_requests,interval)
+        
+        return_value = analyze_apache_workers(datapoints, apache_connections, apache_requests, warn,crit)
+        
     elif re.match('nginx(.*).connections',datasource) != None: 
         return_value = analyze_nginx_connections(datapoints,warn,crit)
     else: 
@@ -224,7 +240,7 @@ def analyze_nginx_connections(datapoints,warn,crit):
     
     return res
     
-def analyze_apache_workers(datapoints,warn,crit):
+def analyze_apache_workers(datapoints,apache_connections, apache_requests, warn,crit):
     ds = init_datastruct(warn,crit)
     
     res = dict()
@@ -235,6 +251,28 @@ def analyze_apache_workers(datapoints,warn,crit):
     index_busy = datapoints['labels'].index("busy")
     max_workers = datapoints['data'][0][index_idle] + datapoints['data'][0][index_busy]
     
+    # Connections
+    nb_of_datapoints_conn = len(apache_connections['data'])
+    index_conn = apache_connections['labels'].index("connections")
+    connections = 0
+    
+    #print dict(apache_connections)
+    
+    for time in range(0, nb_of_datapoints_conn):
+        connections += apache_connections['data'][time][index_conn]
+        
+    connections = connections/nb_of_datapoints_conn
+    
+    # Requests
+    nb_of_datapoints_req = len(apache_requests['data'])
+    index_req = apache_requests['labels'].index("requests")
+    requests = 0
+    
+    for time in range(0, nb_of_datapoints_req):
+        requests += apache_requests['data'][time][index_req]
+    
+    requests = requests/nb_of_datapoints_req
+    
     worker_usage = 0
     
     for time in range(0, nb_of_datapoints):
@@ -243,7 +281,7 @@ def analyze_apache_workers(datapoints,warn,crit):
     worker_usage = float(worker_usage)
     worker_mean_usage = ((worker_usage/nb_of_datapoints)/max_workers)*100
     
-    ds['perfdata_buffer'] += "time=%s, worker_usage=%s" % (datapoints['data'][-1][0], worker_mean_usage)
+    ds['perfdata_buffer'] += "time=%s, worker_usage=%s, connections=%s, requests=%s" % (datapoints['data'][-1][0], worker_mean_usage, connections, requests)
     
     if worker_mean_usage >= ds['warn'] and worker_mean_usage < ds['crit']:
         ds['warning_flag'] = True
@@ -594,7 +632,7 @@ def main(argv):
         print usage()
         sys.exit(3)
 
-    return_values = get_from_datasource(hostaddress,port,datasource,interval,warning,critical)
+    return_values = analyze_from_datasource(hostaddress,port,datasource,interval,warning,critical)
     if return_values is None:
         sys.exit(3)
     print return_values['output']
