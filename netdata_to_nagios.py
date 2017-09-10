@@ -454,7 +454,7 @@ def analyze_disk_space(datapoints,partition,warn,crit):
     
     ds['perfdata_buffer'] += "time="+str(last_point)+", "+partition+"="+used_space_str
     
-    if used_space >= ds['warn'] and available_space < ds['crit']:
+    if used_space >= ds['warn'] and used_space < ds['crit']:
         ds['warning_flag']=True
         ds['output_buffer'] += "Warning space left on "+partition+" : "+used_space_str+"%"
     elif used_space >= ds['crit']:
