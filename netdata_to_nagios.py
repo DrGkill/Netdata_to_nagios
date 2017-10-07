@@ -27,6 +27,7 @@
 #            - disk_space._home
 #            - apache_local.workers
 #            - nginx_local.connections : Check nginx connections
+#            - mdstat.mdstat_health : Check if there is a faulty md raid array
 #     -i interval
 #        Specify an interval in seconds (minimum 2)
 #        Default : 2
@@ -89,6 +90,7 @@ def usage():
 			- system.cpu : Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
             - disk_util.sda : Check disk load (sda, sdb,... can specify the name of your drive)
             - disk_space._ : Check disk space (_ for /, _mnt_disk1 for /mnt/disk1)
+            - mdstat.mdstat_health : Check if there is a faulty md raid array
             - apache_local.workers : Check apache worker utilization 
             - nginx_local.connections : Check nginx connections
      -i interval
@@ -163,7 +165,7 @@ def get_simple_datasource(hostaddress,port,datasource,interval):
     
         
 def analyze_from_datasource(hostaddress,port,datasource,interval,warn,crit):
-        
+    
     datapoints = get_simple_datasource(hostaddress,port,datasource,interval)
     
     if re.match('disk_util',datasource) != None:
@@ -202,11 +204,47 @@ def analyze_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         
     elif re.match('nginx(.*).connections',datasource) != None: 
         return_value = analyze_nginx_connections(datapoints,warn,crit)
+        
+    elif datasource == "mdstat.mdstat_health":
+        return_value = mdstat_analyze(datapoints, warn, crit)
+        
     else: 
         return None
     
     return return_value 
 
+def mdstat_analyze(datapoints,warn,crit):
+    ds = init_datastruct(warn,crit)
+    res = dict()
+    
+    #pp = pprint.PrettyPrinter(indent=4)
+    #pp.pprint(datapoints)
+    
+    nb_of_datapoints = len(datapoints['data'])
+    
+    devices = datapoints["labels"]
+    devices.remove("time")
+    
+    faulty_devices = set()
+    
+    for device in devices:
+        current_device_offset = datapoints['labels'].index(device)+1
+        for  time in range(0, nb_of_datapoints):
+            if datapoints['data'][time][current_device_offset] > 0:
+                faulty_devices.add(device)
+    
+    if len(faulty_devices) > 1:
+        faulty_devices_str = ", ".join(faulty_devices)
+        ds['critical_flag'] = True
+        ds['output_buffer'] = "CRITICAL : Degraded mode for arrays : " + faulty_devices_str
+    else:
+        ds['output_buffer'] = "OK : All arrays seems ok."
+
+    res['output'] = ds['output_buffer']
+    res['code'] = sysexit(ds['ok_flag'],ds['warning_flag'],ds['critical_flag'])
+    
+    return res
+    
 def analyze_nginx_connections(datapoints,warn,crit):
     ds = init_datastruct(warn,crit)
     
