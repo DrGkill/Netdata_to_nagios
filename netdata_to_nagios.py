@@ -268,7 +268,7 @@ def analyze_nginx_connections(datapoints,warn,crit):
     
     if connections_mean >= ds['warn'] and connections_mean < ds['crit']:
         ds['warning_flag'] = True
-        ds['output_buffer'] += "Warining, nginx max connections almost reached : %d" % (connections_mean)
+        ds['output_buffer'] += "Warning, nginx max connections almost reached : %d" % (connections_mean)
     elif connections_mean >= ds['crit']:
         ds['critical_flag'] = True
         ds['output_buffer'] += "Critical, nginx max connections reached : %d" % (connections_mean)
@@ -301,7 +301,7 @@ def analyze_nginx_requests(datapoints,warn,crit):
     
     if connections_mean >= ds['warn'] and connections_mean < ds['crit']:
         ds['warning_flag'] = True
-        ds['output_buffer'] += "Warining, nginx max request rate : %d" % (connections_mean)
+        ds['output_buffer'] += "Warning, nginx max request rate : %d" % (connections_mean)
     elif connections_mean >= ds['crit']:
         ds['critical_flag'] = True
         ds['output_buffer'] += "Critical, nginx max request rate : %d" % (connections_mean)
@@ -361,7 +361,7 @@ def analyze_apache_workers(datapoints,apache_connections, apache_requests, warn,
     
     if worker_mean_usage >= ds['warn'] and worker_mean_usage < ds['crit']:
         ds['warning_flag'] = True
-        ds['output_buffer'] += "Warining, apache max worker almost reached : %.2f %%" % (worker_mean_usage)
+        ds['output_buffer'] += "Warning, apache max worker almost reached : %.2f %%" % (worker_mean_usage)
     elif worker_mean_usage >= ds['crit']:
         ds['critical_flag'] = True
         ds['output_buffer'] += "Critical, apache max worker reached : %.2f %%" % (worker_mean_usage)
@@ -422,42 +422,42 @@ def analyze_system_cpu(datapoints,warn,crit):
     
     if softirq >= ds['warn'] and softirq < ds['crit']:
         ds['warning_flag'] = True
-        ds['output_buffer'] += "Warining, network driver may have an issue: soft_irq=%s%" % (softirq)
+        ds['output_buffer'] += "Warning, network driver may have an issue: soft_irq=%s%" % (softirq)
     elif softirq >= ds['crit']:
         ds['critical_flag'] = True
         ds['output_buffer'] += "Critical, network driver may have an issue: soft_irq=%s%" % (softirq)
         
     elif irq >= ds['warn'] and irq < ds['crit']:
         ds['warning_flag'] = True
-        ds['output_buffer'] += "Warining, lots of interruptions: irq=%s%%" % (irq)
+        ds['output_buffer'] += "Warning, lots of interruptions: irq=%s%%" % (irq)
     elif irq >= ds['crit']:
         ds['critical_flag'] = True
         ds['output_buffer'] += "Critical, lots of interruptions: irq=%s%%" % (irq)    
         
     elif user >= ds['warn'] and user < ds['crit']:
         ds['warning_flag'] = True
-        ds['output_buffer'] += "Warining, an application is highly loaded: user=%s%%" % (user)
+        ds['output_buffer'] += "Warning, an application is highly loaded: user=%s%%" % (user)
     elif user >= ds['crit']:
         ds['critical_flag'] = True
         ds['output_buffer'] += "Critical, an application is highly loaded: user=%s%%" % (user)
         
     elif system >= ds['warn'] and system < ds['crit']:
         ds['warning_flag'] = True
-        ds['output_buffer'] += "Warining, system is highly loaded: system=%s%%" % (system)
+        ds['output_buffer'] += "Warning, system is highly loaded: system=%s%%" % (system)
     elif system >= ds['crit']:
         ds['critical_flag'] = True
         ds['output_buffer'] += "Critical, system is highly loaded: system=%s%%" % (system)
      
     elif nice >= ds['warn'] and nice < ds['crit']:
         ds['warning_flag'] = True
-        ds['output_buffer'] += "Warining, scheduling overhead too high: nice=%s%%" % (nice)
+        ds['output_buffer'] += "Warning, scheduling overhead too high: nice=%s%%" % (nice)
     elif nice >= ds['crit']:
         ds['critical_flag'] = True
         ds['output_buffer'] += "Critical, scheduling overhead too high: nice=%s%%" % (nice)
      
     elif iowait >= ds['warn'] and iowait < ds['crit']:
         ds['warning_flag'] = True
-        ds['output_buffer'] += "Warining, a disk may be slowing everybody down: iowait=%s%%" % (iowait)
+        ds['output_buffer'] += "Warning, a disk may be slowing everybody down: iowait=%s%%" % (iowait)
     elif iowait >= ds['crit']:
         ds['critical_flag'] = True
         ds['output_buffer'] += "Critical, a disk may be slowing everybody down: iowait=%s%%" % (iowait)
