@@ -140,14 +140,15 @@ Here is the full command options manual :
      -D, --datasource
         Specify which datasource you want to check. 
         Available datasources :
-            - apps.cpu                  (default) Check CPU load per process
-            - system.ram :              Check REAL RAM consumption
-            - system.cpu :              Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
-            - disk_util.sda :           Check disk load (sda, sdb,... can specify the name of your drive)
-            - disk_space.sda1 :         Check disk space (sda2, sdb1,... can specify the name of your partition)
-            - apache_local.workers :    Check Apache worker consumption
-            - nginx_local.connections : Check nginx connections
-            - mdstat.mdstat_health :    Check if there is a faulty md raid array
+            - apps.cpu                 (default) Check CPU load per process
+            - system.ram               Check REAL RAM consumption
+            - system.cpu               Gives CPU laod system view (user, system, nice, irq, softirq, iowait)
+            - disk_util.sda            Check disk load (sda, sdb,... can specify the name of your drive)
+            - disk_space.sda1          Check disk space (sda2, sdb1,... can specify the name of your partition)
+            - apache_local.workers     Check Apache worker consumption
+            - nginx_local.connections  Check nginx connections
+            - nginx_local.requests     Check nginx request rate 
+            - mdstat.mdstat_health     Check if there is a faulty md raid array
             
      -i interval
         Specify an interval in seconds (minimum 2)

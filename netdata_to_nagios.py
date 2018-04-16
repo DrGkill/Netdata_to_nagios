@@ -27,6 +27,7 @@
 #            - disk_space._home
 #            - apache_local.workers
 #            - nginx_local.connections : Check nginx connections
+#            - nginx_local.requests : Check nginx request rate
 #            - mdstat.mdstat_health : Check if there is a faulty md raid array
 #     -i interval
 #        Specify an interval in seconds (minimum 2)
@@ -203,7 +204,10 @@ def analyze_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         return_value = analyze_apache_workers(datapoints, apache_connections, apache_requests, warn,crit)
         
     elif re.match('nginx(.*).connections',datasource) != None: 
+        return_value = analyze_nginx_connections(datapoints,warn,crit)  
+    elif re.match('nginx(.*).requests',datasource) != None:
         return_value = analyze_nginx_connections(datapoints,warn,crit)
+
         
     elif datasource == "mdstat.mdstat_health":
         return_value = mdstat_analyze(datapoints, warn, crit)
@@ -277,7 +281,41 @@ def analyze_nginx_connections(datapoints,warn,crit):
     res['code'] = sysexit(ds['ok_flag'],ds['warning_flag'],ds['critical_flag'])
     
     return res
+ 
+def analyze_nginx_requests(datapoints,warn,crit):
+    ds = init_datastruct(warn,crit)
     
+    res = dict()
+    nb_of_datapoints = len(datapoints['data'])
+    
+    connections = 0
+    
+    #"labels": ["time", "requests"],
+    index_active = datapoints['labels'].index("requests")
+    for time in range(0, nb_of_datapoints):
+        connections += datapoints['data'][time][index_active]
+        
+    connections_mean = int(connections / nb_of_datapoints)
+    
+    ds['perfdata_buffer'] += "time=%s, nginx_requests=%s" % (datapoints['data'][-1][0], connections_mean)
+    
+    if connections_mean >= ds['warn'] and connections_mean < ds['crit']:
+        ds['warning_flag'] = True
+        ds['output_buffer'] += "Warining, nginx max request rate : %d" % (connections_mean)
+    elif connections_mean >= ds['crit']:
+        ds['critical_flag'] = True
+        ds['output_buffer'] += "Critical, nginx max request rate : %d" % (connections_mean)
+    else:
+        ds['output_buffer']="Request rate OK"
+        ds['ok_flag']=True
+        
+    ds['output_buffer'] += ds['perfdata_buffer']
+    res['output'] = ds['output_buffer']
+    res['code'] = sysexit(ds['ok_flag'],ds['warning_flag'],ds['critical_flag'])
+    
+    return res
+
+   
 def analyze_apache_workers(datapoints,apache_connections, apache_requests, warn,crit):
     ds = init_datastruct(warn,crit)
     
