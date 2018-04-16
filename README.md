@@ -9,9 +9,9 @@ OK | kernel=0.070277775, log=0.000277777777778, system=0.0130555555556, inetd=0,
 Table of Contents:
 ------------------
 
-* [Introduction] (#intro)
-* [Install] (#install)
-* [Command options] (#options)
+* [Introduction](#intro)
+* [Install](#install)
+* [Command options](#options)
 
 
 <img src="http://www.omegacube.fr/static/img/grafana.png">
@@ -47,7 +47,7 @@ define command{
 Monitor memory usage:	
 ```	
 define service{
-	use                             generic-service         ; Name of service template to use
+    use                             generic-service         ; Name of service template to use
     host_name                       mymachine
     service_description             Memory Usage
     check_command                   check_memory_via_netdata!19999!system.ram!2!80!90
@@ -58,7 +58,7 @@ Monitor CPU usage per application, will alert on which process consume to much C
 Can help finding which application is consuming CPU ressources
 ```	
 define service{
-	use                             generic-service         ; Name of service template to use
+    use                             generic-service         ; Name of service template to use
     host_name                       mymachine
     service_description             CPU Usage per process
     check_command                   check_cpu_via_netdata!19999!apps.cpu!60!80!90 ; Average cpu load during last 60 seconds
@@ -69,7 +69,7 @@ Monitor CPU usage at a system level:
 Can help finding if CPU is busy because of iowait, irq, system operations, etc.
 ```	
 define service{
-	use                             generic-service         ; Name of service template to use
+    use                             generic-service         ; Name of service template to use
     host_name                       mymachine
     service_description             CPU Usage per process
     check_command                   check_cpu_via_netdata!19999!system.cpu!60!80!90 ; Average cpu load during last 60 seconds
@@ -79,7 +79,7 @@ define service{
 Monitor disk space:
 ```	
 define service{
-	use                             generic-service         ; Name of service template to use
+    use                             generic-service         ; Name of service template to use
     host_name                       mymachine
     service_description             CPU Usage per process
     check_command                   check_cpu_via_netdata!19999!disk_space._!60!80!90 ; monitor / partition
@@ -89,7 +89,7 @@ define service{
 Monitor disk load:
 ```	
 define service{
-	use                             generic-service         ; Name of service template to use
+    use                             generic-service         ; Name of service template to use
     host_name                       mymachine
     service_description             CPU Usage per process
     check_command                   check_cpu_via_netdata!19999!disk_util.sda!60!80!90 ; Average load during last 60 seconds
@@ -99,7 +99,7 @@ define service{
 Monitor Apache workers:
 ```	
 define service{
-	use                             generic-service         ; Name of service template to use
+    use                             generic-service         ; Name of service template to use
     host_name                       mymachine
     service_description             CPU Usage per process
     check_command                   check_cpu_via_netdata!19999!apache_local.workers!60!80!90 ; Average worker consumption during last 60 seconds
@@ -109,7 +109,7 @@ define service{
 Monitor Nginx workers:
 ```	
 define service{
-	use                             generic-service         ; Name of service template to use
+    use                             generic-service         ; Name of service template to use
     host_name                       mymachine
     service_description             CPU Usage per process
     check_command                   check_cpu_via_netdata!19999!nginx_local.connections!60!1900!2048 ; Average worker consumption during last 60 seconds
