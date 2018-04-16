@@ -206,7 +206,7 @@ def analyze_from_datasource(hostaddress,port,datasource,interval,warn,crit):
     elif re.match('nginx(.*).connections',datasource) != None: 
         return_value = analyze_nginx_connections(datapoints,warn,crit)  
     elif re.match('nginx(.*).requests',datasource) != None:
-        return_value = analyze_nginx_connections(datapoints,warn,crit)
+        return_value = analyze_nginx_requests(datapoints,warn,crit)
 
         
     elif datasource == "mdstat.mdstat_health":
