@@ -8,7 +8,7 @@
 #
 # Usage:        Utilisation:
 #    netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] [-c <90>] [-w <80>]
-#    
+#
 #    Options:
 #     -h, --help
 #        Show detailed help
@@ -70,7 +70,7 @@ def usage():
     usage = """
     Utilisation:
     netdata_to_nagios.py -H host -p port [-D <datasource>] [-i <interval>] -w <80> -c <90>
-    
+
     Options:
      -h, --help
         Show detailed help
@@ -104,7 +104,7 @@ def usage():
      -c, --critical
         Specify critical threshold
     """
-    
+
     return usage
 
 def printp(json):
@@ -204,7 +204,7 @@ def analyze_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         return_value = analyze_apache_workers(datapoints, apache_connections, apache_requests, warn,crit)
 
     elif re.match('nginx(.*).connections',datasource) != None:
-        return_value = analyze_nginx_connections(datapoints,warn,crit)  
+        return_value = analyze_nginx_connections(datapoints,warn,crit)
     elif re.match('nginx(.*).requests',datasource) != None:
         return_value = analyze_nginx_requests(datapoints,warn,crit)
 
@@ -212,7 +212,7 @@ def analyze_from_datasource(hostaddress,port,datasource,interval,warn,crit):
     elif datasource == "mdstat.mdstat_health":
         return_value = mdstat_analyze(datapoints, warn, crit)
 
-    else: 
+    else:
         return None
 
     return return_value
@@ -353,7 +353,7 @@ def analyze_apache_workers(datapoints,apache_connections, apache_requests, warn,
 
     for time in range(0, nb_of_datapoints):
         worker_usage += datapoints['data'][time][index_busy]
-        
+
     worker_usage = float(worker_usage)
     worker_mean_usage = ((worker_usage/nb_of_datapoints)/max_workers)*100
 
@@ -694,7 +694,7 @@ def main(argv):
         elif opt in ("-i", "--interval"):
             interval= str(0-int(arg))
 
-    try: 
+    try:
         warning
     except NameError:
         print "Missing warning threshold !"
