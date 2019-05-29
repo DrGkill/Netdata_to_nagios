@@ -29,6 +29,8 @@
 #            - nginx_local.connections : Check nginx connections
 #            - nginx_local.requests : Check nginx request rate
 #            - mdstat.mdstat_health : Check if there is a faulty md raid array
+#     -s, --slave
+#        Get data from the specified slave, instead of the host connected to
 #     -i interval
 #        Specify an interval in seconds (minimum 2)
 #        Default : 60
@@ -94,6 +96,10 @@ def usage():
             - mdstat.mdstat_health : Check if there is a faulty md raid array
             - apache_local.workers : Check apache worker utilization
             - nginx_local.connections : Check nginx connections
+
+     -s, --slave
+        Get data from the specified slave, instead of the host connected to			
+
      -i interval
         Specify an interval in seconds (minimum 2)
         Default : 60
@@ -146,13 +152,15 @@ def init_datastruct(warn,crit):
 
     return datastruct
 
-def get_simple_datasource(hostaddress,port,datasource,interval):
+def get_simple_datasource(hostaddress,port,slave,datasource,interval):
     URL = ""
     if (abs(int(interval)) < 1) or (abs(int(interval)) > 3600):
         print "Interval problem, should be between 1 and 3600: " + interval
         return None
 
-    URL = 'http://'+hostaddress+':'+port+'/api/v1/data?chart='+datasource+'&after='+interval+'&options=seconds'
+    slave_url = ""
+    if slave != "": slave_url = '/host/'+slave
+    URL = 'http://'+hostaddress+':'+port+slave_url+'/api/v1/data?chart='+datasource+'&after='+interval+'&options=seconds'
 
     req = urllib2.Request(URL)
 
@@ -165,9 +173,9 @@ def get_simple_datasource(hostaddress,port,datasource,interval):
     return json.loads(res.read())
 
 
-def analyze_from_datasource(hostaddress,port,datasource,interval,warn,crit):
+def analyze_from_datasource(hostaddress,port,slave,datasource,interval,warn,crit):
 
-    datapoints = get_simple_datasource(hostaddress,port,datasource,interval)
+    datapoints = get_simple_datasource(hostaddress,port,slave,datasource,interval)
 
     if re.match('disk_util',datasource) != None:
         splitted_datasource = re.split('(disk_util).(\w+)',datasource)
@@ -198,8 +206,8 @@ def analyze_from_datasource(hostaddress,port,datasource,interval,warn,crit):
         datasource_connections = re.sub(r'(apache.*).workers',r'\1.connections', datasource)
         datasource_requests = re.sub(r'(apache.*).workers',r'\1.requests', datasource)
 
-        apache_connections = get_simple_datasource(hostaddress,port,datasource_connections,interval)
-        apache_requests = get_simple_datasource(hostaddress,port,datasource_requests,interval)
+        apache_connections = get_simple_datasource(hostaddress,port,slave,datasource_connections,interval)
+        apache_requests = get_simple_datasource(hostaddress,port,slave,datasource_requests,interval)
 
         return_value = analyze_apache_workers(datapoints, apache_connections, apache_requests, warn,crit)
 
@@ -668,7 +676,7 @@ def analyze_cpu_per_process(datapoints,warn,crit):
 
 def main(argv):
     try:
-            opts, args = getopt.getopt(argv,"hD:i:w:c:H:p:",["help","datasource=","interval=","warning=","critical=","host=","port="])
+            opts, args = getopt.getopt(argv,"hD:i:w:c:H:p:s:",["help","datasource=","interval=","warning=","critical=","host=","port=","slave="])
     except getopt.GetoptError:
             print usage()
             sys.exit(3)
@@ -676,6 +684,7 @@ def main(argv):
     port = '19999'
     interval = '-60'
     datasource = 'apps.cpu'
+    slave = ''
 
     for opt, arg in opts:
         if opt in ('-h', "--help"):
@@ -693,6 +702,8 @@ def main(argv):
             datasource = arg
         elif opt in ("-i", "--interval"):
             interval= str(0-int(arg))
+        elif opt in ("-s","--slave"):
+            slave = arg
 
     try:
         warning
@@ -708,7 +719,7 @@ def main(argv):
         print usage()
         sys.exit(3)
 
-    return_values = analyze_from_datasource(hostaddress,port,datasource,interval,warning,critical)
+    return_values = analyze_from_datasource(hostaddress,port,slave,datasource,interval,warning,critical)
     if return_values is None:
         sys.exit(3)
     print return_values['output']
